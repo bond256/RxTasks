@@ -19,8 +19,9 @@ public class MainActivity extends AppCompatActivity implements View {
         setContentView(R.layout.activity_main);
         presenter = new MainPresenter(this);
         //presenter.task1();
-        presenter.task2();
+        //presenter.task2();
         //presenter.task3();
+        presenter.task4();
     }
 
 

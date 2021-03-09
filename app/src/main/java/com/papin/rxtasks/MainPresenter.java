@@ -1,16 +1,22 @@
 package com.papin.rxtasks;
 
 import android.annotation.SuppressLint;
+import android.util.Log;
 
+import java.net.BindException;
 import java.util.List;
 
+import io.reactivex.Observable;
+import io.reactivex.Observer;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.BehaviorSubject;
 
 class MainPresenter {
 
@@ -72,15 +78,56 @@ class MainPresenter {
 
     @SuppressLint("CheckResult")
     void task3(){
-        network.getFirstPage()
+        Observable.just("Bung");
+    }
+    @SuppressLint("CheckResult")
+    void task4(){
+        BehaviorSubject<Integer> behaviorSubject=BehaviorSubject.create();
+        behaviorSubject.onNext(1);
+        behaviorSubject.onNext(2);
+        behaviorSubject.onNext(3);
+        behaviorSubject
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<List<Story>>() {
+                .subscribe(new Observer<Integer>() {
                     @Override
-                    public void accept(List<Story> stories) throws Exception {
-                        //mView.showResultSecond(stories);
+                    public void onSubscribe(@NonNull Disposable d) {
+
                     }
-                });
+
+                    @Override
+                    public void onNext(@NonNull Integer integer) {
+                        Log.d("tag", "onNext: "+integer);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+    });
+        behaviorSubject.onNext(4);
+        behaviorSubject.onNext(5);
+        behaviorSubject.onNext(6);
+        behaviorSubject.subscribe(new Consumer<Integer>() {
+            @Override
+            public void accept(Integer integer) throws Exception {
+                Log.d("tag", "onNext: "+integer);
+            }
+        });
+
+        Log.d("tag", "task4: "+behaviorSubject.getValue().toString());
+    }
+
+    void task11(){
+        network.getFirstPage()
+                .flatMap(it->network.getAuthor(it.get(2).getAuthor()))
+                .map(it->)
+                .subscribeOn(Schedulers.io())
     }
 
 
