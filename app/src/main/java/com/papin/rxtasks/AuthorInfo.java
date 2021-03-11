@@ -5,7 +5,7 @@ public class AuthorInfo {
     private String name;
     private String title;
 
-    public AuthorInfo(int karma, String name, String title) {
+    public AuthorInfo(String name,int karma, String title) {
         this.karma = karma;
         this.name = name;
         this.title = title;
