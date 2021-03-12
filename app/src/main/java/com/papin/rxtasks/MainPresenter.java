@@ -1,6 +1,7 @@
 package com.papin.rxtasks;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.util.Log;
 
 import com.google.gson.internal.$Gson$Preconditions;
@@ -12,9 +13,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.Single;
+import io.reactivex.SingleObserver;
+import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
@@ -85,14 +89,14 @@ class MainPresenter {
 
     @SuppressLint("CheckResult")
     void task3() {
-        Observable<String> observable = Observable.create(emitter -> {
-            Boolean flag = new Random().nextBoolean();
+        Maybe<String> maybeSource = Maybe.create(emitter -> {
+            boolean flag = new Random().nextBoolean();
             if (flag)
-                emitter.onNext("Bang1");
+                emitter.onSuccess("Bang1");
             else emitter.onError(new IllegalArgumentException());
         });
 
-        observable
+        maybeSource
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(it1 -> {
@@ -102,13 +106,13 @@ class MainPresenter {
 
     @SuppressLint("CheckResult")
     void task4() {
-        Observable<String> observable = Observable.create(emitter -> {
+        Maybe<String> maybeSource = Maybe.create(emitter -> {
             boolean flag = new Random().nextBoolean();
-            if (flag) emitter.onNext("Bang1");
+            if (flag) emitter.onSuccess("Bang1");
             else emitter.onComplete();
         });
 
-        observable
+        maybeSource
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(it1 -> {
@@ -120,37 +124,44 @@ class MainPresenter {
     }
 
 
-    void task5(){
-        Observable<String> observable = Observable.create(emitter -> {
+    @SuppressLint("CheckResult")
+    void task5() {
+        Maybe<String> maybeSource = Maybe.create(emitter -> {
             boolean flag = new Random().nextBoolean();
-            if (flag) emitter.onNext("Bang1");
-            else emitter.onComplete();
+            if (flag) emitter.onSuccess("Bang!");
+            else emitter.onError(new Throwable("You're live"));
         });
 
-        observable
-                .to
+        maybeSource
+                .subscribeOn(Schedulers.io())
+                .toSingle()
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnError(it -> Log.d("tag", "task5: " + it.getLocalizedMessage()))
+                .subscribe(it -> Log.d("tag", "task5: " + it));
+
     }
 
     @SuppressLint("CheckResult")
-    void task7(){
-        Observable<Integer> observable=Observable.fromArray(0,1,2,3,4,5,6,7,8,9,10);
-        observable.timeout(1,TimeUnit.SECONDS)
-                .subscribeOn(Schedulers.io())
+    void task7() {
+        Observable<Long> observable = Observable.intervalRange(0, 10, 0, 1, TimeUnit.SECONDS);
+        observable
+                .subscribeOn(Schedulers.io()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<Integer>() {
+                .subscribe(new Observer<Long>() {
                     @Override
                     public void onSubscribe(@NonNull Disposable d) {
                         Log.d("tag", "onSubscribe: ");
                     }
 
                     @Override
-                    public void onNext(@NonNull Integer integer) {
-                        Log.d("tag", "onNext: "+integer);
+                    public void onNext(@NonNull Long value) {
+                        Log.d("tag", "onNext: " + value);
                     }
+
 
                     @Override
                     public void onError(@NonNull Throwable e) {
-                        Log.d("tag", "onError: "+e.getLocalizedMessage());
+                        Log.d("tag", "onError: " + e.getLocalizedMessage());
                     }
 
                     @Override
@@ -178,6 +189,39 @@ class MainPresenter {
 
     @SuppressLint("CheckResult")
     void task9() {
+        Observable<Long> observable = Observable.intervalRange(0, 10, 0, 1, TimeUnit.SECONDS);
+        observable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Long>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                        Log.d("tag", "Subscribed");
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull Long aLong) {
+                        if (aLong == 7) {
+                            onError(new Exception("Your error message"));
+                        }
+                        Log.d("tag", "onNext: " + aLong);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        Log.d("tag", "onError: " + e.getLocalizedMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    @SuppressLint("CheckResult")
+    void task10() {
         BehaviorSubject<Integer> behaviorSubject = BehaviorSubject.create();
         behaviorSubject.onNext(1);
         behaviorSubject.onNext(2);

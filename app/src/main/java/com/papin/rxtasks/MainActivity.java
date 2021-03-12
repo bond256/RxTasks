@@ -22,6 +22,9 @@ public class MainActivity extends AppCompatActivity implements View {
         //presenter.task2(); ok
         //presenter.task3(); ok
         //presenter.task4(); ok
+        //presenter.task5(); ok
+        //presenter.task7();
+        //presenter.task9(); ok
         //presenter.task11(); ok
         //presenter.task4();
     }
